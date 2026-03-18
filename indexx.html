@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>FLOOD & LANDSLIDE TRACKER — Sign In / Sign Up</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root{--brand:#0a3a76;--accent:#0e4a9c}
+  body{
+    font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+    margin:0;
+    background:linear-gradient(135deg,#e6eef6,#f7fbff);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding-top:40px;
+  }
+  .main-heading{ text-align:center; margin-bottom:20px; }
+  .main-heading h1{ margin:0; font-size:2rem; font-weight:800; color:var(--brand); letter-spacing:1px; }
+  .main-heading p{ margin-top:6px; font-size:1rem; color:#444; opacity:0.85; }
+
+  .card{ width:95%; max-width:760px; background:#fff; border-radius:12px; box-shadow:0 8px 30px rgba(10,58,118,0.12); padding:2rem; display:grid; grid-template-columns:1fr 1fr; gap:2rem; }
+  @media(max-width:800px){.card{grid-template-columns:1fr;padding:1rem}}
+  h1{ margin:0 0 0.5rem 0;color:var(--brand) }
+  p.lead{ margin:0 0 1rem 0;color:#444 }
+  .box{ background:#fbfdff; border-radius:10px; padding:1rem; box-shadow:0 2px 8px rgba(10,58,118,0.05) }
+  label{ display:block; font-weight:600; margin-top:0.6rem }
+  input,select{ width:100%; padding:0.6rem; border-radius:6px; border:1.6px solid #e0e6ef; margin-top:0.4rem; font-size:1rem }
+  .btn{ background:var(--brand); color:#fff; padding:0.75rem; border:none; border-radius:8px; font-weight:700; cursor:pointer; margin-top:1rem }
+  .muted{ font-size:0.9rem; color:#666; margin-top:0.4rem }
+  .msg{ margin-top:0.6rem; font-weight:700 }
+  .success{ color:green } .error{ color:#d63031 }
+  .small{ font-size:0.9rem; color:#666; margin-top:0.6rem }
+  .center{ display:flex; align-items:center; justify-content:center; flex-direction:column }
+</style>
+</head>
+<body>
+
+<div class="main-heading">
+  <h1>FLOOD & LANDSLIDE TRACKER</h1>
+  <p>Please create an account, then sign in to open the dashboard.</p>
+</div>
+
+<div class="card" role="main" aria-label="Authentication">
+  <!-- SIGN UP -->
+  <div class="box" aria-labelledby="signupHeading">
+    <h1 id="signupHeading">Create Account / Register</h1>
+    <p class="lead">Register your phone (saved locally only).</p>
+
+    <label for="countryRegister">Country code</label>
+    <select id="countryRegister">
+      <option value="+977" selected>Nepal (+977)</option>
+      <option value="+91">India (+91)</option>
+      <option value="+975">Bhutan (+975)</option>
+      <option value="+1">USA (+1)</option>
+    </select>
+
+    <label for="phoneRegister">Phone (no country code)</label>
+    <input id="phoneRegister" type="tel" placeholder="9XXXXXXXXX" inputmode="tel" />
+
+    <button class="btn" id="signupBtn">Sign Up (register only)</button>
+    <p id="signupMsg" class="msg" role="status" aria-live="polite"></p>
+
+    <p class="small">Your number is stored locally in your browser (localStorage). No server is used.</p>
+  </div>
+
+  <!-- SIGN IN -->
+  <div class="box" aria-labelledby="signinHeading">
+    <h1 id="signinHeading">Sign In</h1>
+    <p class="lead">Sign in after registering to access the dashboard.</p>
+
+    <label for="countrySignin">Country code</label>
+    <select id="countrySignin">
+      <option value="+977" selected>Nepal (+977)</option>
+      <option value="+91">India (+91)</option>
+      <option value="+975">Bhutan (+975)</option>
+      <option value="+1">USA (+1)</option>
+    </select>
+
+    <label for="phoneSignin">Phone (no country code)</label>
+    <input id="phoneSignin" type="tel" placeholder="9XXXXXXXXX" inputmode="tel" />
+
+    <button class="btn" id="signinBtn">Sign In</button>
+    <p id="signinMsg" class="msg" role="status" aria-live="polite"></p>
+
+    <div class="center" style="margin-top:1rem">
+      <p class="muted">Or open the dashboard as guest (limited):</p>
+      <button class="btn" id="guestBtn" style="background:var(--accent)">Open Dashboard (Guest)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const signupBtn = document.getElementById('signupBtn');
+  const signupMsg = document.getElementById('signupMsg');
+  const countryRegister = document.getElementById('countryRegister');
+  const phoneRegister = document.getElementById('phoneRegister');
+
+  const signinBtn = document.getElementById('signinBtn');
+  const signinMsg = document.getElementById('signinMsg');
+  const countrySignin = document.getElementById('countrySignin');
+  const phoneSignin = document.getElementById('phoneSignin');
+
+  const guestBtn = document.getElementById('guestBtn');
+
+  function isValidPhone(phone) {
+    return /^\d{7,15}$/.test(String(phone).trim());
+  }
+
+  // SIGN UP: only register, do not auto-redirect to dashboard
+  signupBtn.addEventListener('click', () => {
+    const phone = phoneRegister.value.trim();
+    if (!isValidPhone(phone)) {
+      signupMsg.textContent = 'Enter a valid phone number (7–15 digits).';
+      signupMsg.className = 'msg error';
+      return;
+    }
+    const full = `${countryRegister.value}${phone}`;
+    localStorage.setItem('registeredNumber', full);
+
+    // pre-fill sign-in fields for convenience
+    countrySignin.value = countryRegister.value;
+    phoneSignin.value = phone;
+
+    signupMsg.textContent = `Registered ${full}. Now please sign in to continue.`;
+    signupMsg.className = 'msg success';
+  });
+
+  // SIGN IN: check stored registration, then set loggedIn flag
+  signinBtn.addEventListener('click', () => {
+    const phone = phoneSignin.value.trim();
+    if (!isValidPhone(phone)) {
+      signinMsg.textContent = 'Enter a valid phone number.';
+      signinMsg.className = 'msg error';
+      return;
+    }
+    const full = `${countrySignin.value}${phone}`;
+    const stored = localStorage.getItem('registeredNumber');
+
+    if (stored === full) {
+      // set logged-in flag and open dashboard
+      localStorage.setItem('loggedIn', 'true');
+      signinMsg.textContent = 'Sign in successful! Opening dashboard...';
+      signinMsg.className = 'msg success';
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+    } else {
+      signinMsg.textContent = 'Account not found. Please register first.';
+      signinMsg.className = 'msg error';
+    }
+  });
+
+  // GUEST MODE
+  guestBtn.addEventListener('click', () => {
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('registeredNumber'); // optional: remove or keep; guest has no SMS
+    localStorage.setItem('guestMode', 'true');
+    window.location.href = 'dashboard.html';
+  });
+
+  // On load: clear signin message but do not show registered number
+  document.addEventListener('DOMContentLoaded', () => {
+    signinMsg.textContent = '';
+    signupMsg.textContent = '';
+  });
+</script>
+
+</body>
+</html>
